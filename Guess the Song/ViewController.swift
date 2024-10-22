@@ -3,18 +3,21 @@ import MediaPlayer
 
 class ViewController: UIViewController, UITableViewDataSource {
 
-    // TODO: Create a settings page to adjust the seconds and begin the main screen.
+    // TODO: Save these songs
+    struct Song {
+        let title: String
+        let artist: String
+        let url: URL?
+        let artwork: UIImage?
+    }
     
-    @IBOutlet weak var tableView: UITableView!
     var fetchedSongTitles: [String] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.dataSource = self
         
         // Load the songs
         importMusic()
-        
     }
     
     private func importMusic() {
@@ -26,31 +29,33 @@ class ViewController: UIViewController, UITableViewDataSource {
                     self.fetchMusic()
                 }
             }
-        } else if status == .authorized {
+        }
+        else if status == .authorized {
             fetchMusic()
         }
     }
     
+    private var fetchedSongs = [Song]()
+
     private func fetchMusic() {
         let query = MPMediaQuery.songs()
         if let items = query.items {
             for item in items {
-                // TODO: Create a struct for this in the future.
-                let title = item.title
-                // TODO: Delete this later, just wanted to visibly see the songs.
-                self.fetchedSongTitles.append(title ?? "")
-                let artist = item.artist
+                let title = item.title ?? "Unknown Title"
+                let artist = item.artist ?? "Unknown Artist"
                 let url = item.assetURL
-                if let artwork = item.artwork {
-                            let image = artwork.image(at: CGSize(width: 100, height: 100))
-                        }
-            }
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
+                let artwork: UIImage? = item.artwork?.image(at: CGSize(width: 100, height: 100))
+
+                // Create a Song struct with the fetched data
+                let song = Song(title: title, artist: artist, url: url, artwork: artwork)
+
+                // Append the Song struct to the fetchedSongs array
+                self.fetchedSongs.append(song)
             }
         }
     }
     
+    // TODO: Move this (kept it so I could reference it for later)
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return fetchedSongTitles.count
     }
