@@ -1,17 +1,9 @@
 import UIKit
 import MediaPlayer
 
-class ViewController: UIViewController, UITableViewDataSource {
-
-    // TODO: Save these songs
-    struct Song {
-        let title: String
-        let artist: String
-        let url: URL?
-        let artwork: UIImage?
-    }
+class ViewController: UIViewController {
     
-    var fetchedSongTitles: [String] = []
+    var fetchedSongs: [String] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,8 +26,6 @@ class ViewController: UIViewController, UITableViewDataSource {
             fetchMusic()
         }
     }
-    
-    private var fetchedSongs = [Song]()
 
     private func fetchMusic() {
         let query = MPMediaQuery.songs()
@@ -47,22 +37,29 @@ class ViewController: UIViewController, UITableViewDataSource {
                 let artwork: UIImage? = item.artwork?.image(at: CGSize(width: 100, height: 100))
 
                 // Create a Song struct with the fetched data
-                let song = Song(title: title, artist: artist, url: url, artwork: artwork)
-
-                // Append the Song struct to the fetchedSongs array
-                self.fetchedSongs.append(song)
+                let song = SongData(title: title, artist: artist, url: url, artwork: artwork)
+                
+                saveSongToCoreData(songData: song)
             }
         }
     }
     
-    // TODO: Move this (kept it so I could reference it for later)
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchedSongTitles.count
-    }
+    func saveSongToCoreData(songData: SongData) {
+        let context = (UIApplication.shared.delegate as! AppDelegate).musicPersistentContainer.viewContext
+        let song = SongEntity(context: context)
+        
+        song.title = songData.title
+        song.artist = songData.artist
+        song.url = songData.url?.absoluteString
+        if let artwork = songData.artwork {
+            song.imageData = artwork.pngData()
+        }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = fetchedSongTitles[indexPath.row] // Set the song title
-        return cell
+        do {
+            try context.save()
+            print("Song saved successfully!")
+        } catch {
+            print("Failed to save song: \(error)")
+        }
     }
 }
