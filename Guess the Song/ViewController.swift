@@ -36,17 +36,33 @@ class ViewController: UIViewController {
         let query = MPMediaQuery.songs()
         if let items = query.items {
             let savedSongs = songFuncs.fetchSongsFromCoreData()
+
             for item in items {
+                // Check if the song is DRM-protected or a cloud item without being available locally
+                if item.isCloudItem || item.hasProtectedAsset {
+                    print("\(item.title ?? "Unknown Title") is DRM protected, skipping")
+                    continue
+                }
+                
+                // Ensure the item has a valid URL
+                guard let url = item.assetURL else {
+                    continue
+                }
+
                 let title = item.title ?? "Unknown Title"
+                
+                // Skip songs with "Unknown Title"
+                if title == "Unknown Title" {
+                    continue
+                }
                 
                 // Check if the song is already in Core Data
                 if savedSongs.first(where: { $0.title == title }) != nil {
                     continue
                 }
                 
-                // Proceed to save the song if it doesn't exist in Core Data
+                // Proceed to save the song if it doesn't exist in Core Data and has a valid URL
                 let artist = item.artist ?? "Unknown Artist"
-                let url = item.assetURL
                 let artwork: UIImage? = item.artwork?.image(at: CGSize(width: 100, height: 100))
                 
                 // Create and save the song to Core Data
@@ -55,4 +71,5 @@ class ViewController: UIViewController {
             }
         }
     }
+
 }
