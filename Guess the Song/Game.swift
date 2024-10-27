@@ -7,13 +7,21 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     var fetchedSongs: [SongData] = []
     let songFuncs = SongFuncs()
-    var player: AVPlayer?
+    var player: AVAudioPlayer?
+    let silentAudioURL = URL(string: "https://example.com/silentAudio.m4a")!
     var selectedSong: SongData?
-    
-    @IBAction func quitButtonTapped(_ sender: UIButton) {
-        dismiss(animated: true, completion: nil)
+    var currentSong: SongData?
+    var playbackTimer: Timer?
+    var savedDuration: Float = 1
+    var incorrectGuess: Int = 0
+    var score: Int = 0 {
+        didSet {
+            // Update the label whenever score changes
+            scoreLabel.text = "\(score) 🔥"
+        }
     }
     
+    @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet weak var incorrectGuessLabel: UILabel!
     @IBOutlet weak var albumImageView: UIImageView!
     @IBOutlet weak var playButton: UIButton!
@@ -22,7 +30,7 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let savedDuration = UserDefaults.standard.value(forKey: "selectedDuration")
+        savedDuration = UserDefaults.standard.value(forKey: "selectedDuration") as! Float
         incorrectGuessLabel.text = ""
         fetchedSongs = songFuncs.fetchSongsFromCoreData()
         tableView.delegate = self
@@ -34,14 +42,52 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
         } catch {
             print("Failed to activate audio session: \(error.localizedDescription)")
         }
+        
+        playGame()
+    }
+    
+    func playGame() {
+        if (incorrectGuess != 3) {
+            currentSong = getRandomSong()
+            // For debugging purposes
+            print("Current song: " + (currentSong?.title ?? ""))
+            if (currentSong == nil) {
+                print("No songs available!")
+                // Bring up the start menu or force the user to the main screen
+            }
+        }
+    }
+    
+    func getRandomSong() -> SongData? {
+        guard !fetchedSongs.isEmpty else {
+            return nil
+        }
+        
+        // Pick a random song
+        let randomIndex = Int.random(in: 0..<fetchedSongs.count)
+        return fetchedSongs[randomIndex]
+    }
+    
+    @IBAction func quitButtonTapped(_ sender: UIButton) {
+        dismiss(animated: true, completion: nil)
     }
     
     @IBAction func playButtonTouch(_ sender: Any) {
-        playSong(url: (selectedSong?.url)!)
+        playSong(duration: TimeInterval(savedDuration), url: currentSong?.url ?? silentAudioURL)
     }
     
     @IBAction func submitButtonTouch(_ sender: Any) {
-        incorrectGuessLabel.text = (incorrectGuessLabel.text ?? "") + "❌ "
+        if (selectedSong != nil) {
+            // Using this logic instead of url == url because some songs might be singles, compared to the songs on the album
+            if (selectedSong?.title == currentSong?.title && selectedSong?.artist == currentSong?.artist) {
+                score += 1
+                playGame()
+            }
+            else {
+                incorrectGuess += 1
+                incorrectGuessLabel.text = (incorrectGuessLabel.text ?? "") + "❌ "
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -67,11 +113,23 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Optionally, you can deselect the row after selection
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
-    private func playSong(url: URL) {
-        player = AVPlayer(url: url)
-        player?.play()
+    
+    func playSong(duration: TimeInterval, url: URL) {
+        do {
+            // Initialize the audio player with the song URL
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.play()  // Start playing the song
+            
+            // Set up a timer to stop the playback after the specified duration
+            playbackTimer = Timer.scheduledTimer(timeInterval: duration, target: self, selector: #selector(stopPlayback), userInfo: nil, repeats: false)
+        } catch {
+            print("Error playing song: \(error.localizedDescription)")
+        }
+    }
         
-        print("Now playing: \(url)")
+    @objc func stopPlayback() {
+        player?.stop()
+        playbackTimer?.invalidate()
+        playbackTimer = nil
     }
 }

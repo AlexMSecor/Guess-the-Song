@@ -141,6 +141,7 @@
                         <outlet property="albumImageView" destination="BkA-cR-xbo" id="uhl-46-hGq"/>
                         <outlet property="incorrectGuessLabel" destination="4Rd-2c-38d" id="e7r-w6-KF3"/>
                         <outlet property="playButton" destination="kDC-3f-3eg" id="s6F-yW-zBv"/>
+                        <outlet property="scoreLabel" destination="ccg-4X-UQI" id="e1o-9P-vlT"/>
                         <outlet property="tableView" destination="3mG-R5-fKf" id="PBI-1r-cXz"/>
                     </connections>
                 </viewController>
