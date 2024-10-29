@@ -11,9 +11,14 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     let silentAudioURL = URL(string: "https://example.com/silentAudio.m4a")!
     var selectedSong: SongData?
     var currentSong: SongData?
-    var playbackTimer: Timer?
+    var randomStartPoint: TimeInterval?
     var savedDuration: Float = 1
-    var incorrectGuess: Int = 0
+    var incorrectGuess: Int = 0 {
+        didSet {
+            // Update the label whenever the guess is incorrect
+            incorrectGuessLabel.text = (incorrectGuessLabel.text ?? "") + "❌ "
+        }
+    }
     var score: Int = 0 {
         didSet {
             // Update the label whenever score changes
@@ -47,14 +52,33 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func playGame() {
-        if (incorrectGuess != 3) {
-            currentSong = getRandomSong()
-            // For debugging purposes
-            print("Current song: " + (currentSong?.title ?? ""))
-            if (currentSong == nil) {
-                print("No songs available!")
-                // Bring up the start menu or force the user to the main screen
-            }
+        setupRound()
+    }
+    
+    func resetGame() {
+        incorrectGuess = 0
+        incorrectGuessLabel.text = ""
+        score = 0
+    }
+    
+    func setupRound() {
+        // Reset the user's selection
+        albumImageView.image = UIImage (named: "Default Album Cover")
+        selectedSong = nil
+        
+        // Reset the player
+        player = nil
+        
+        // Reset the randomStartPoint
+        randomStartPoint = nil
+        
+        // Get a random song
+        currentSong = getRandomSong()
+        // For debugging purposes
+        print("Current song: " + (currentSong?.title ?? ""))
+        if (currentSong == nil) {
+            print("No songs available!")
+            // Bring up the start menu or force the user to the main screen
         }
     }
     
@@ -80,14 +104,38 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
         if (selectedSong != nil) {
             // Using this logic instead of url == url because some songs might be singles, compared to the songs on the album
             if (selectedSong?.title == currentSong?.title && selectedSong?.artist == currentSong?.artist) {
-                score += 1
-                playGame()
+                userGuessed(isCorrect: true)
+                setupRound()
             }
             else {
-                incorrectGuess += 1
-                incorrectGuessLabel.text = (incorrectGuessLabel.text ?? "") + "❌ "
+                userGuessed(isCorrect: false)
             }
         }
+    }
+    
+    func userGuessed(isCorrect: Bool) {
+        if (isCorrect) {
+            score += 1
+        } else {
+            incorrectGuess += 1
+            checkGameEnd()
+        }
+    }
+    
+    func checkGameEnd() {
+        if incorrectGuess >= 3 {
+            endGame()
+        }
+    }
+    
+    func endGame() {
+        // Save the final score
+        
+        // Display the pop-up box showing the high score and if the user wants to replay
+        
+        // For now...
+        resetGame()
+        playGame()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -116,12 +164,32 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     func playSong(duration: TimeInterval, url: URL) {
         do {
-            // Initialize the audio player with the song URL
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.play()  // Start playing the song
+            // Initialize the audio player with the song URL if it's not already initialized
+            if player == nil {
+                player = try AVAudioPlayer(contentsOf: url)
+                // Prepare the audio player (needed to start playback from a specific position)
+                player?.prepareToPlay()
+            }
             
-            // Set up a timer to stop the playback after the specified duration
-            playbackTimer = Timer.scheduledTimer(timeInterval: duration, target: self, selector: #selector(stopPlayback), userInfo: nil, repeats: false)
+            // If randomStartPoint is not set, generate it
+            if randomStartPoint == nil {
+                let totalDuration = player?.duration ?? 0
+                // Ensure the random start point + duration does not exceed total duration
+                let maxStartPoint = max(0, totalDuration - duration)
+                randomStartPoint = TimeInterval.random(in: 0..<maxStartPoint)
+            }
+
+            // Set the player's current time to the random start point
+            player?.currentTime = randomStartPoint!
+            
+            // Start playing the song
+            player?.play()
+            
+            // DispatchQueue.main.asyncAfter(...) schedules a task to run on the main thread after a delay, which prevents blocking the UI thread during playback
+            // [weak self] creates a weak reference to self, helping prevent retain cycles in case the view controller is deallocated before this executes
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+                self?.stopPlayback()
+            }
         } catch {
             print("Error playing song: \(error.localizedDescription)")
         }
@@ -129,7 +197,5 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
         
     @objc func stopPlayback() {
         player?.stop()
-        playbackTimer?.invalidate()
-        playbackTimer = nil
     }
 }
