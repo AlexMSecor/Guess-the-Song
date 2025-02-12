@@ -19,10 +19,17 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
             incorrectGuessLabel.text = (incorrectGuessLabel.text ?? "") + "❌ "
         }
     }
+    var highScore = "high score"
     var score: Int = 0 {
         didSet {
             // Update the label whenever score changes
-            scoreLabel.text = "\(score) 🔥"
+            // TODO: Change this to be > highScore
+            if (score > 0) {
+                scoreLabel.text = "\(score) 🏆"
+            }
+            else {
+                scoreLabel.text = "\(score) 🔥"
+            }
         }
     }
     
@@ -78,7 +85,6 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("Current song: " + (currentSong?.title ?? ""))
         if (currentSong == nil) {
             print("No songs available!")
-            // Bring up the start menu or force the user to the main screen
         }
     }
     
@@ -93,7 +99,7 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     @IBAction func quitButtonTapped(_ sender: UIButton) {
-        dismiss(animated: true, completion: nil)
+        quitGame()
     }
     
     @IBAction func playButtonTouch(_ sender: Any) {
@@ -129,13 +135,42 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func endGame() {
-        // Save the final score
+        // Display the game over alert with the correct song, score, high score, and the option to replay or quit
+        showGameOverAlert()
+    }
+    
+    func showGameOverAlert() {
+        let gameOverMessage = """
+        The correct song was:
+        \(currentSong?.title ?? "Error loading song title") by \(currentSong?.artist ?? "Error loading artist")
+
+        Your score:
+        \(score) 🔥
         
-        // Display the pop-up box showing the high score and if the user wants to replay
+        High score:
+        \(highScore) 🏆
+        """
         
-        // For now...
+        let alert = UIAlertController(title: "Game Over", message: gameOverMessage, preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Play Again", style: .default, handler: { _ in
+            self.playAgain()
+        }))
+
+        alert.addAction(UIAlertAction(title: "Quit", style: .destructive, handler: { _ in
+            self.quitGame()
+        }))
+
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func playAgain() {
         resetGame()
         playGame()
+    }
+    
+    func quitGame() {
+        dismiss(animated: true, completion: nil)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

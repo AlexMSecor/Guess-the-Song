@@ -26,5 +26,7 @@ class SettingsViewController: UIViewController {
             durationSlider.value = 1
             durationLabel.text = "1 second(s)"
         }
+        
+        // TODO: Add a "reset high score" option
     }
 }
