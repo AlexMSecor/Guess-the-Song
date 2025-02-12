@@ -19,12 +19,15 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
             incorrectGuessLabel.text = (incorrectGuessLabel.text ?? "") + "❌ "
         }
     }
-    var highScore = "high score"
+    var highScore: Int {
+        // Retrieves the high score
+        return UserDefaults.standard.integer(forKey: "highScore")
+    }
+
     var score: Int = 0 {
         didSet {
             // Update the label whenever score changes
-            // TODO: Change this to be > highScore
-            if (score > 0) {
+            if (score > highScore) {
                 scoreLabel.text = "\(score) 🏆"
             }
             else {
@@ -56,6 +59,21 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         
         playGame()
+    }
+    
+    func getHighScore() -> Int {
+        return UserDefaults.standard.integer(forKey: "highScore")
+    }
+    
+    func saveHighScore() {
+        // For debugging
+        print("User's score: \(score)")
+        print("High score: \(highScore)")
+        
+        if score > highScore {
+            // Stores the high score
+            UserDefaults.standard.set(score, forKey: "highScore")
+        }
     }
     
     func playGame() {
@@ -99,8 +117,36 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     @IBAction func quitButtonTapped(_ sender: UIButton) {
-        quitGame()
+        confirmAction(title: "Quit Game", message: "Are you sure you want to quit the game?") { confirmed in
+            if (confirmed) {
+                print("User confirmed the action.")
+                // Save the high score (if applicable)
+                self.saveHighScore()
+                self.quitGame()
+            }
+            else {
+                print("User canceled the action.")
+            }
+        }
     }
+    
+    func confirmAction(title: String, message: String, completion: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let confirm = UIAlertAction(title: "Yes", style: .default) { _ in
+            completion(true)
+        }
+        
+        let cancel = UIAlertAction(title: "No", style: .cancel) { _ in
+            completion(false)
+        }
+        
+        alert.addAction(confirm)
+        alert.addAction(cancel)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+
     
     @IBAction func playButtonTouch(_ sender: Any) {
         playSong(duration: TimeInterval(savedDuration), url: currentSong?.url ?? silentAudioURL)
@@ -135,6 +181,8 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func endGame() {
+        // Save the high score (if applicable)
+        saveHighScore()
         // Display the game over alert with the correct song, score, high score, and the option to replay or quit
         showGameOverAlert()
     }

@@ -187,6 +187,22 @@
                                     <action selector="backButtonTapped:" destination="PiG-f2-d5p" eventType="touchUpInside" id="5Q3-qo-Bxq"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Current high score:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GsR-eU-skD">
+                                <rect key="frame" x="51" y="237" width="291" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="plh-FI-bMN">
+                                <rect key="frame" x="51" y="273" width="291" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="Reset High Score"/>
+                                <connections>
+                                    <action selector="resetHighScoreButtonTapped:" destination="PiG-f2-d5p" eventType="touchUpInside" id="G8g-cb-dpB"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Z4V-tE-NqE"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -195,11 +211,12 @@
                     <connections>
                         <outlet property="durationLabel" destination="p6z-6J-0gO" id="WW8-Y4-jFL"/>
                         <outlet property="durationSlider" destination="g4u-cT-aVZ" id="TVP-d1-rvn"/>
+                        <outlet property="highScoreLabel" destination="GsR-eU-skD" id="K1v-rk-Yv6"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="clb-OK-FVW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1221" y="556"/>
+            <point key="canvasLocation" x="1220.6106870229007" y="554.92957746478874"/>
         </scene>
     </scenes>
     <resources>
@@ -209,7 +226,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemFillColor">
-            <color red="0.47058823529999999" green="0.47058823529999999" blue="0.50196078430000002" alpha="0.20000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.47058823529411764" green="0.47058823529411764" blue="0.50196078431372548" alpha="0.20000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
