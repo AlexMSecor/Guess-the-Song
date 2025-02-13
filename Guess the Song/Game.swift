@@ -8,6 +8,8 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     var fetchedSongs: [SongData] = []
     let songFuncs = SongFuncs()
     var player: AVAudioPlayer?
+    var isPlaying = false
+    var stopPlaybackWorkItem: DispatchWorkItem?
     let silentAudioURL = URL(string: "https://example.com/silentAudio.m4a")!
     var selectedSong: SongData?
     var currentSong: SongData?
@@ -247,6 +249,9 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     func playSong(duration: TimeInterval, url: URL) {
         do {
+            // Stop current playback and cancel any previous stop action
+            stopPlayback(cancelPendingStop: true)
+            
             // Initialize the audio player with the song URL if it's not already initialized
             if player == nil {
                 player = try AVAudioPlayer(contentsOf: url)
@@ -265,20 +270,35 @@ class GameViewController: UIViewController, UITableViewDelegate, UITableViewData
             // Set the player's current time to the random start point
             player?.currentTime = randomStartPoint!
             
+            isPlaying = true
+            
             // Start playing the song
             player?.play()
             
             // DispatchQueue.main.asyncAfter(...) schedules a task to run on the main thread after a delay, which prevents blocking the UI thread during playback
             // [weak self] creates a weak reference to self, helping prevent retain cycles in case the view controller is deallocated before this executes
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+            // Create a new DispatchWorkItem to schedule stop action
+            let workItem = DispatchWorkItem { [weak self] in
                 self?.stopPlayback()
             }
+            stopPlaybackWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: workItem)
         } catch {
             print("Error playing song: \(error.localizedDescription)")
         }
     }
         
-    @objc func stopPlayback() {
-        player?.stop()
+    @objc func stopPlayback(cancelPendingStop: Bool = false) {
+        // Cancel any previous stop task to prevent early stopping
+        if cancelPendingStop {
+            stopPlaybackWorkItem?.cancel()
+            stopPlaybackWorkItem = nil
+        }
+
+        // Only stop the player if it's currently playing
+        if isPlaying {
+            player?.stop()
+            isPlaying = false
+        }
     }
 }
