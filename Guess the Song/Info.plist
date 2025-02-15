@@ -21,7 +21,5 @@
 			</array>
 		</dict>
 	</dict>
-    <key>NSAppleMusicUsageDescription</key>
-    <string>This app requires access to your music library to play your songs for a game.</string>
 </dict>
 </plist>

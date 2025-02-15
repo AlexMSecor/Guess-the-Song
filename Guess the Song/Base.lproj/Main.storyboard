@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JZ0-aG-xzy">
-                                <rect key="frame" x="136" y="345" width="120" height="38"/>
+                                <rect key="frame" x="97" y="345" width="203" height="38"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <rect key="contentStretch" x="1" y="1" width="1" height="1"/>
                                 <state key="normal" title="Button"/>
@@ -33,12 +33,8 @@
                                     <segue destination="5Cm-we-N5n" kind="presentation" modalPresentationStyle="fullScreen" id="VLO-U4-EhH"/>
                                 </connections>
                             </button>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Guess the Song Logo" translatesAutoresizingMaskIntoConstraints="NO" id="DId-se-Bm6">
-                                <rect key="frame" x="-54" y="86" width="500" height="267"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="43q-pA-CqG">
-                                <rect key="frame" x="136" y="391" width="120" height="38"/>
+                                <rect key="frame" x="97" y="391" width="203" height="38"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <rect key="contentStretch" x="1" y="1" width="1" height="1"/>
                                 <state key="normal" title="Button"/>
@@ -52,6 +48,10 @@
                                     <segue destination="PiG-f2-d5p" kind="show" id="8LV-fs-TRF"/>
                                 </connections>
                             </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Guess the Song Logo" translatesAutoresizingMaskIntoConstraints="NO" id="DId-se-Bm6">
+                                <rect key="frame" x="61" y="85" width="270" height="270"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemGray6Color"/>
